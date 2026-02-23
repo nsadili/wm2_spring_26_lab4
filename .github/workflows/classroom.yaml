@@ -2,32 +2,66 @@ name: Hidden Tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [main, master]
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
 
     steps:
-      - uses: actions/checkout@v3
+      # Checkout student code first
+      - uses: actions/checkout@v4
 
-      - name: Checkout hidden tests
-        uses: actions/checkout@v3
-        with:
-          repository: nsadili/backend-lab4-tests
-          token: ${{ secrets.TEST_REPO_TOKEN }}
-          path: hidden-tests
-
-      - name: Copy hidden tests
-        run: |
-          mkdir -p src/test/java
-          cp -r hidden-tests/src/test/java/* src/test/java/
-
+      # Setup Java before running tests
       - name: Set up Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
+      # Setup Gradle
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      # Checkout hidden tests with error handling
+      - name: Checkout hidden tests
+        id: checkout-hidden
+        uses: actions/checkout@v4
+        with:
+          repository: nsadili/backend-lab4-tests
+          token: ${{ secrets.TEST_REPO_TOKEN }}
+          path: hidden-tests
+          ref: main  # Explicitly specify default branch
+
+      # Debug step - check if checkout worked
+      - name: Verify hidden tests
+        run: |
+          ls -la hidden-tests/
+          find hidden-tests -name "*.java" | head -10
+
+      # Copy hidden tests with proper directory structure
+      - name: Copy hidden tests
+        run: |
+          mkdir -p src/test/java
+          if [ -d "hidden-tests/src/test/java" ]; then
+            cp -r hidden-tests/src/test/java/* src/test/java/
+          else
+            echo "ERROR: hidden-tests/src/test/java not found!"
+            find hidden-tests -type d
+            exit 1
+          fi
+
+      # Run tests
       - name: Run tests
-        run: ./gradlew test
+        run: ./gradlew test --info
+
+      # Upload results for debugging
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: build/reports/tests/test/
