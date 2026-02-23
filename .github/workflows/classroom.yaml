@@ -1,0 +1,33 @@
+name: Hidden Tests
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Checkout hidden tests
+        uses: actions/checkout@v3
+        with:
+          repository: nsadili/backend-lab4-tests
+          token: ${{ secrets.TEST_REPO_TOKEN }}
+          path: hidden-tests
+
+      - name: Copy hidden tests
+        run: |
+          mkdir -p src/test/java
+          cp -r hidden-tests/src/test/java/* src/test/java/
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Run tests
+        run: ./gradlew test
