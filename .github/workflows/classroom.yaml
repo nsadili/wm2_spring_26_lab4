@@ -31,7 +31,7 @@ jobs:
         id: checkout-hidden
         uses: actions/checkout@v4
         with:
-          repository: nsadili/backend-lab4-tests
+          repository: nsadili/wm2_spring_26_lab4_tests
           token: ${{ secrets.TEST_REPO_TOKEN }}
           path: hidden-tests
           ref: main  # Explicitly specify default branch
