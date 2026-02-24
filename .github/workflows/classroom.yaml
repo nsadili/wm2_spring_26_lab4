@@ -39,7 +39,7 @@ jobs:
 
       # If token checkout failed, try with GITHUB_TOKEN (for same-org repos)
       - name: Checkout hidden tests (fallback)
-        if: steps.checkout.outcome == 'failure'
+      #  if: steps.checkout.outcome == 'failure'
         uses: actions/checkout@v4
         with:
           repository: SITE-ADA/wm2_spring_26_lab4_tests
