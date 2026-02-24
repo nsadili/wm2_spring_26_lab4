@@ -27,14 +27,25 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       # Checkout hidden tests with error handling
-      - name: Checkout hidden tests
-        id: checkout-hidden
+      #- name: Checkout hidden tests
+      #  id: checkout-hidden
+      #  uses: actions/checkout@v4
+      #  continue-on-error: true
+      #  with:
+      #    repository: nsadili/wm2_spring_26_lab4_tests
+      #    token: ${{ secrets.TEST_REPO_TOKEN }}
+      #    path: hidden-tests
+      #    ref: main  # Explicitly specify default branch
+
+      # If token checkout failed, try with GITHUB_TOKEN (for same-org repos)
+      - name: Checkout hidden tests (fallback)
+        if: steps.checkout.outcome == 'failure'
         uses: actions/checkout@v4
         with:
-          repository: nsadili/wm2_spring_26_lab4_tests
+          repository: SITE-ADA/wm2_spring_26_lab4_tests
           token: ${{ secrets.TEST_REPO_TOKEN }}
           path: hidden-tests
-          ref: main  # Explicitly specify default branch
+          ref: main
 
       # Debug step - check if checkout worked
       - name: Verify hidden tests
